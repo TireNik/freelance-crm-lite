@@ -18,4 +18,5 @@ public class CustomerDtoResponse {
     String company;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
+    UserDtoResponse owner;
 }

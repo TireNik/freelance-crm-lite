@@ -9,5 +9,7 @@ import java.util.List;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = "spring")
 public interface CustomerMapper {
+    CustomerDtoResponse toCustomerDtoResponse(Customer customer);
+
     List<CustomerDtoResponse> toCustomerDtoResponseList(List<Customer> customer);
 }
