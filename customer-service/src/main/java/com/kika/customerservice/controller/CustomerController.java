@@ -1,13 +1,13 @@
 package com.kika.customerservice.controller;
 
+import com.kika.customerservice.dto.CustomerDtoRequest;
 import com.kika.customerservice.dto.CustomerDtoResponse;
 import com.kika.customerservice.service.CustomersService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -22,6 +22,12 @@ public class CustomerController {
     public ResponseEntity<List<CustomerDtoResponse>> getAllCustomers() {
         List<CustomerDtoResponse> customers = customersService.getAllCustomers();
         return ResponseEntity.ok(customers);
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public CustomerDtoResponse createCustomer (@Valid @RequestBody CustomerDtoRequest request) {
+        return customersService.createCustomer(request);
     }
 }
 
