@@ -9,12 +9,15 @@ import com.kika.customerservice.repository.CustomerRepository;
 import com.kika.customerservice.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class CustomersServiceImpl implements CustomersService {
 
     private final CustomerRepository customerRepository;
@@ -22,11 +25,14 @@ public class CustomersServiceImpl implements CustomersService {
     private final UserRepository userRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public List<CustomerDtoResponse> getAllCustomers() {
-        return customerMapper.toCustomerDtoResponseList(customerRepository.findAll());
+        List<CustomerDtoResponse> customers = customerMapper.toCustomerDtoResponseList(customerRepository.findAll());
+        return customers;
     }
 
     @Override
+    @Transactional
     public CustomerDtoResponse createCustomer(CustomerDtoRequest request) {
          User owner = userRepository.findById(request.userId())
                  .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + request.userId()));
