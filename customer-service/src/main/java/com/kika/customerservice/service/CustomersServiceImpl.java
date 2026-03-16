@@ -8,6 +8,8 @@ import com.kika.customerservice.mapper.CustomerMapper;
 import com.kika.customerservice.producer.KafkaProducerService;
 import com.kika.customerservice.repository.CustomerRepository;
 import com.kika.customerservice.repository.UserRepository;
+import io.micrometer.core.annotation.Counted;
+import io.micrometer.core.annotation.Timed;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,12 +30,30 @@ public class CustomersServiceImpl implements CustomersService {
 
     @Override
     @Transactional(readOnly = true)
+    @Counted(
+            value = "customer.get.all",
+            description = "Count of get all customers",
+            recordFailuresOnly = true
+    )
+    @Timed(
+            value = "customer.get.all.time",
+            description = "Time taken to get all customers"
+    )
     public List<CustomerDtoResponse> getAllCustomers() {
         return customerMapper.toCustomerDtoResponseList(customerRepository.findAll());
     }
 
     @Override
     @Transactional
+    @Counted(
+            value = "customer.created",
+            description = "Count of created customers",
+            recordFailuresOnly = true
+    )
+    @Timed(
+            value = "customer.created.time",
+            description = "Time taken to create a customer"
+    )
     public CustomerDtoResponse createCustomer(CustomerDtoRequest request) {
         User owner = userRepository.findById(request.userId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + request.userId()));
