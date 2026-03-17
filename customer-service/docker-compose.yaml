@@ -14,6 +14,8 @@ services:
       timeout: 5s
       start_period: 10s
       retries: 5
+    networks:
+      - app-network
 
   kafka:
     image: confluentinc/cp-kafka:latest
@@ -40,8 +42,8 @@ services:
       timeout: 5s
       start_period: 30s
       retries: 5
-    depends_on:
-      - zookeeper
+    networks:
+      - app-network
 
   redis:
     image: redis:7.0-alpine
@@ -49,24 +51,14 @@ services:
     ports:
       - "6379:6379"
     healthcheck:
-      test: redis-cli ping
-      interval: 10s
-      timeout: 5s
+      test: [ "CMD-SHELL", "redis-cli ping || exit 1" ]
+      interval: 5s
+      timeout: 3s
       start_period: 10s
-      retries: 5
+      retries: 10
+    networks:
+      - app-network
 
-
-  zookeeper:
-    image: zookeeper:latest
-    restart: "no"
-    ports:
-      - "2181:2181"
-    healthcheck:
-      test: nc -z 127.0.0.1 2181 || exit -1
-      interval: 10s
-      timeout: 5s
-      start_period: 10s
-      retries: 5
 
   customer-service:
     image: customer-service:latest
@@ -79,9 +71,12 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: docker
     depends_on:
-      - customer-postgres
-      - redis
-      - kafka
+      customer-postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
     networks:
       - app-network
 
@@ -96,8 +91,6 @@ services:
       - "9090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    depends_on:
-      - customer-service
     networks:
       - app-network
     healthcheck:

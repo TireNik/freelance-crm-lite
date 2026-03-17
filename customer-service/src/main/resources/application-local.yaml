@@ -1,4 +1,6 @@
 spring:
+  application:
+    name : customer-service
   datasource:
     url: jdbc:h2:mem:customerdb
     driver-class-name: org.h2.Driver
@@ -26,10 +28,21 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,prometheus
+        include: health,info,prometheus,metrics
   metrics:
     tags:
       application: customer-service
+    export:
+      prometheus:
+        enabled: true
+    cache:
+      enabled: true
+  endpoint:
+    prometheus:
+      enabled: true
+    metrics:
+      enabled: true
 
 server:
   port: 8081
+  address: 0.0.0.0

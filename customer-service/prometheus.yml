@@ -6,4 +6,10 @@ scrape_configs:
   - job_name: 'customer-service'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['customer-service:8080']
+      - targets: ['host.docker.internal:8081']
+
+#scrape_configs:
+#  - job_name: 'customer-service'
+#    metrics_path: '/actuator/prometheus'
+#    static_configs:
+#      - targets: ['customer-service:8080']

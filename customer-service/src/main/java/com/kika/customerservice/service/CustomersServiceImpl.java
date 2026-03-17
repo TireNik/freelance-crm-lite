@@ -33,11 +33,12 @@ public class CustomersServiceImpl implements CustomersService {
     @Counted(
             value = "customer.get.all",
             description = "Count of get all customers",
-            recordFailuresOnly = true
+            recordFailuresOnly = false
     )
     @Timed(
             value = "customer.get.all.time",
-            description = "Time taken to get all customers"
+            description = "Time taken to get all customers",
+            histogram = true
     )
     public List<CustomerDtoResponse> getAllCustomers() {
         return customerMapper.toCustomerDtoResponseList(customerRepository.findAll());
