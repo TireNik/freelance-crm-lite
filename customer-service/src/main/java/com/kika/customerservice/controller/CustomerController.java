@@ -5,8 +5,6 @@ import com.kika.customerservice.dto.CustomerDtoResponse;
 import com.kika.customerservice.service.CustomersService;
 import io.micrometer.core.annotation.Counted;
 import io.micrometer.core.annotation.Timed;
-import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.MeterRegistry;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -25,8 +23,6 @@ import java.util.List;
 public class CustomerController {
 
     private final CustomersService customersService;
-    private final MeterRegistry meterRegistry;
-
 
     @GetMapping
     @Operation(summary = "Получить всех клиентов")
