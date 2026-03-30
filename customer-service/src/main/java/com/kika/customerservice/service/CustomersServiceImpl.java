@@ -1,17 +1,18 @@
 package com.kika.customerservice.service;
 
-import com.kika.customerservice.dto.CustomerCreatedEvent;
 import com.kika.customerservice.dto.CustomerDtoRequest;
 import com.kika.customerservice.dto.CustomerDtoResponse;
 import com.kika.customerservice.entity.Customer;
 import com.kika.customerservice.entity.User;
 import com.kika.customerservice.mapper.CustomerMapper;
+import com.kika.customerservice.producer.KafkaProducerService;
 import com.kika.customerservice.repository.CustomerRepository;
 import com.kika.customerservice.repository.UserRepository;
+import io.micrometer.core.annotation.Counted;
+import io.micrometer.core.annotation.Timed;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,17 +26,35 @@ public class CustomersServiceImpl implements CustomersService {
     private final CustomerRepository customerRepository;
     private final CustomerMapper customerMapper;
     private final UserRepository userRepository;
-    private final NotificationService notificationService;
-    private final ApplicationEventPublisher eventPublisher;
+    private final KafkaProducerService kafkaProducer;
 
     @Override
     @Transactional(readOnly = true)
+    @Counted(
+            value = "customer.get.all",
+            description = "Count of get all customers",
+            recordFailuresOnly = false
+    )
+    @Timed(
+            value = "customer.get.all.time",
+            description = "Time taken to get all customers",
+            histogram = true
+    )
     public List<CustomerDtoResponse> getAllCustomers() {
         return customerMapper.toCustomerDtoResponseList(customerRepository.findAll());
     }
 
     @Override
     @Transactional
+    @Counted(
+            value = "customer.created",
+            description = "Count of created customers",
+            recordFailuresOnly = true
+    )
+    @Timed(
+            value = "customer.created.time",
+            description = "Time taken to create a customer"
+    )
     public CustomerDtoResponse createCustomer(CustomerDtoRequest request) {
         User owner = userRepository.findById(request.userId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + request.userId()));
@@ -51,9 +70,7 @@ public class CustomersServiceImpl implements CustomersService {
 
         Customer saved = customerRepository.save(customer);
 
-        eventPublisher.publishEvent(new CustomerCreatedEvent(saved.getId()));
-
-        notificationService.sendWelcomeTaskAsync(saved.getId());
+        kafkaProducer.sendCustomerCreatedEvent(saved.getId());
         log.info("[CUSTOMER CREATED] {}", saved.getId());
 
         return customerMapper.toCustomerDtoResponse(saved);

@@ -14,6 +14,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.*;
 
 import java.time.Duration;
+import java.util.Set;
 
 import static org.springframework.data.redis.serializer.RedisSerializationContext.SerializationPair;
 
@@ -38,10 +39,13 @@ public class RedisConfig {
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofMinutes(10))
                 .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer()))
-                .serializeValuesWith(SerializationPair.fromSerializer(jackson2JsonRedisSerializer()));
+                .serializeValuesWith(SerializationPair.fromSerializer(jackson2JsonRedisSerializer()))
+                .disableCachingNullValues();
 
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(config)
+                .initialCacheNames(Set.of("customers"))
+                .enableStatistics()
                 .build();
     }
 
@@ -50,7 +54,7 @@ public class RedisConfig {
     public Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.registerModule(new ParameterNamesModule()); // ✅ Ключевое добавление
+        objectMapper.registerModule(new ParameterNamesModule());
 
         objectMapper.activateDefaultTyping(
             objectMapper.getPolymorphicTypeValidator(),

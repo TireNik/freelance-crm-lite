@@ -5,4 +5,5 @@ import lombok.Value;
 @Value
 public class CustomerCreatedEvent {
     Long customerId;
+    String message;
 }
