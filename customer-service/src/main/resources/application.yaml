@@ -4,3 +4,8 @@ spring:
 
   profiles:
     default: local
+
+jwt:
+  secret: nH3WnY2lMuKvr+dsArI5uW2nNiZhMJCkq7K4D5pXduk=
+  expiration:
+    ms: 3600000
